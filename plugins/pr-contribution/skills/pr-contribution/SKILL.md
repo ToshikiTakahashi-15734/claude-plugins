@@ -29,12 +29,14 @@ Claude Code の transcript を解析し、作業における人間とAIの寄与
 | **raw** | 生の累積比率（従来）。データ皆無なら `--` | `H / (H+A)` |
 
 - `K` は100%の粘り具合を決める初期人間クレジット（既定5000tok）。`human-start:20000` のように指定可。
-- 切替コマンド:
-  ```bash
-  echo human-start   > ~/.claude/pr-contribution.mode   # 100%スタート（既定）
-  echo human-start:20000 > ~/.claude/pr-contribution.mode  # 100%を長く保つ
-  echo raw           > ~/.claude/pr-contribution.mode   # 生の累積
+- **切替は `/pr-mode` コマンドが最も簡単**:
   ```
+  /pr-mode              # human-start ⇄ raw をトグル
+  /pr-mode raw          # raw に設定
+  /pr-mode start        # human-start に設定
+  /pr-mode start:20000  # K=20000 で human-start に
+  ```
+  手動で切り替えるなら `~/.claude/pr-contribution.mode` に `human-start` / `raw` を書く。
 - 表示末尾に現在のモードが `[start]` / `[raw]` として出る。
 
 ## 指標① 会話コンテキスト比率（`analyze.py`）
