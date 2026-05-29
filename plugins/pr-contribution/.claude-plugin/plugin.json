@@ -1,8 +1,8 @@
 {
   "name": "pr-contribution",
   "displayName": "PR Contribution Analyzer",
-  "version": "1.0.0",
-  "description": "Claude Code の transcript から「人間が投入したコンテキスト量」と「AI生成量」を数値化し、人間コンテキスト比率を算出する。PRブランチ単位で横断集計し、PR本文に埋め込める。",
+  "version": "1.1.0",
+  "description": "Claude Code の作業の人間/AI寄与を2指標で数値化: ①会話コンテキスト比率(transcriptベース) ②コード実装率(git差分とWrite/Edit照合で誰が書いたか)。PR本文埋め込みとステータスライン表示に対応。",
   "author": {
     "name": "takahashitoshiki"
   },

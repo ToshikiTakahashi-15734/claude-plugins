@@ -6,8 +6,10 @@
 
 ### pr-contribution
 
-Claude Code との作業における **「人間が投入したコンテキスト量」** と **「AIが生成した量」** を
-transcript(JSONL) から数値化するプラグイン。
+Claude Code との作業における人間とAIの寄与を、transcript(JSONL) と git 差分から数値化するプラグイン。
+**意味の異なる2つの指標**を持つ。
+
+#### 指標① 会話コンテキスト比率 — 「どれだけ相談・資料を投入したか」
 
 ```
 人間由来コンテキスト = 人間が打った指示(会話) + 読み込まれたdoc/既存コード/コマンド結果(ユニーク)
@@ -15,15 +17,26 @@ AI生成量           = assistant の output_tokens (実測)
 人間コンテキスト比率 = 人間由来コンテキスト / (人間由来 + AI生成)
 ```
 
-- 比率が **高い** → 大量のdoc・既存コード・指示を土台にAIに作らせた = **人間主導**
-- 比率が **低い** → わずかなコンテキストからAIが大量に生成した = **AI主導**
+#### 指標② コード実装率 — 「最終的にPRに残ったコードを誰が書いたか」
+
+会話量に左右されず、実際の差分で判定する。
+
+```
+PR最終差分の追加行を、Claudeが Write/Edit で書いた内容と1行ずつ照合:
+  AIが書いた行   = Claudeの出力に含まれる行
+  人間が書いた行 = 含まれない行
+AI実装率 = AIが書いた行 / (AIが書いた行 + 人間が書いた行)
+```
+
+> ①と②は別物。①でAI比率が高くても、②で人間実装率が高ければ
+> 「相談は多いが手は人間が動かした」と読める。
 
 #### できること
 
 | 機能 | 内容 |
 |---|---|
-| **スキル** `/pr-contribution` | ブランチ単位で複数セッションを横断集計し、比率と内訳を表示。PR本文へ埋め込みも可 |
-| **ステータスライン** | 画面下部に現在セッションのコンテキスト比を常時表示（`👤 7% █░░░ 🤖 93%`） |
+| **スキル** `/pr-contribution` | ①②両方を算出して表示。PR本文へ埋め込みも可 |
+| **ステータスライン** | 画面下部に現在セッションのコンテキスト比(①)を常時表示（`👤 7% █░░░ 🤖 93%`） |
 
 ## インストール
 
@@ -64,8 +77,11 @@ claude --plugin-dir ./plugins/pr-contribution
 スクリプト単体のテスト:
 
 ```bash
-# ブランチ横断で集計
+# 指標① 会話コンテキスト比率（ブランチ横断で集計）
 python3 plugins/pr-contribution/skills/pr-contribution/analyze.py --cwd "$PWD" --branch <branch>
+
+# 指標② コード実装率（誰が書いたか）
+python3 plugins/pr-contribution/skills/pr-contribution/code_authorship.py --repo "$PWD"
 
 # ステータスライン出力
 echo '{"transcript_path":"<jsonl>"}' | python3 plugins/pr-contribution/skills/pr-contribution/statusline.py
