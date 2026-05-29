@@ -1,0 +1,14 @@
+{
+  "name": "takahashitoshiki-plugins",
+  "owner": {
+    "name": "takahashitoshiki"
+  },
+  "description": "takahashitoshiki の個人プラグイン集",
+  "plugins": [
+    {
+      "name": "pr-contribution",
+      "source": "./plugins/pr-contribution",
+      "description": "人間コンテキスト量 vs AI生成量を数値化するスキル"
+    }
+  ]
+}

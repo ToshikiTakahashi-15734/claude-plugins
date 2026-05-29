@@ -1,0 +1,10 @@
+{
+  "name": "pr-contribution",
+  "displayName": "PR Contribution Analyzer",
+  "version": "1.0.0",
+  "description": "Claude Code の transcript から「人間が投入したコンテキスト量」と「AI生成量」を数値化し、人間コンテキスト比率を算出する。PRブランチ単位で横断集計し、PR本文に埋め込める。",
+  "author": {
+    "name": "takahashitoshiki"
+  },
+  "keywords": ["pr", "metrics", "ai-contribution", "transcript", "tokens"]
+}
