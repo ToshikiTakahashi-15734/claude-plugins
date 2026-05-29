@@ -1,10 +1,16 @@
 {
   "name": "pr-contribution",
   "displayName": "PR Contribution Analyzer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Claude Code の作業の人間/AI寄与を2指標で数値化: ①会話コンテキスト比率(transcriptベース) ②コード実装率(git差分とWrite/Edit照合で誰が書いたか)。PR本文埋め込みとステータスライン表示に対応。",
   "author": {
     "name": "takahashitoshiki"
   },
-  "keywords": ["pr", "metrics", "ai-contribution", "transcript", "tokens"]
+  "keywords": [
+    "pr",
+    "metrics",
+    "ai-contribution",
+    "transcript",
+    "tokens"
+  ]
 }

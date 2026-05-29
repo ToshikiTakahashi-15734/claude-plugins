@@ -107,6 +107,33 @@ def analyze(path):
     return human, ai_output, total
 
 
+# モードファイル。プラグイン更新で消えない安定パスに置く。
+# 環境変数 PR_CONTRIB_MODE_FILE で上書き可能。
+MODE_FILE = os.environ.get(
+    "PR_CONTRIB_MODE_FILE", os.path.expanduser("~/.claude/pr-contribution.mode"))
+DEFAULT_PRIOR = 5000  # human-start モードの初期人間クレジット K (tok)
+
+
+def read_mode():
+    """モードファイルを読む。"raw" or "human-start[:K]"。既定は human-start。"""
+    mode, prior = "human-start", DEFAULT_PRIOR
+    try:
+        txt = open(MODE_FILE, encoding="utf-8").read().strip()
+    except OSError:
+        return mode, prior
+    if not txt:
+        return mode, prior
+    parts = txt.split(":")
+    name = parts[0].strip().lower()
+    if name in ("raw", "cumulative"):
+        mode = "raw"
+    elif name in ("human-start", "start", "human"):
+        mode = "human-start"
+        if len(parts) > 1 and parts[1].strip().isdigit():
+            prior = int(parts[1].strip())
+    return mode, prior
+
+
 def main():
     try:
         raw = sys.stdin.read()
@@ -114,17 +141,25 @@ def main():
     except (json.JSONDecodeError, ValueError):
         data = {}
 
+    mode, prior = read_mode()
+
     path = resolve_transcript(data)
-    if not path:
-        print("👤 -- 🤖 --")
-        return
-    res = analyze(path)
-    if not res or res[2] == 0:
-        print("👤 -- 🤖 --")
-        return
-    human, ai, total = res
-    hr = human / total * 100
-    ar = ai / total * 100
+    res = analyze(path) if path else None
+    human, ai = (res[0], res[1]) if res else (0, 0)
+
+    if mode == "human-start":
+        # Aが0(=まだ何も生成していない)なら必ず100%。Aが増えるほど実比率へ収束。
+        denom = human + ai + prior
+        hr = (human + prior) / denom * 100 if denom else 100.0
+        tag = "start"
+    else:  # raw: 生の累積。データ皆無なら -- 表示。
+        total = human + ai
+        if total == 0:
+            print("👤 -- 🤖 -- [raw]")
+            return
+        hr = human / total * 100
+        tag = "raw"
+    ar = 100 - hr
 
     # ANSI色: 人間=シアン, AI=マゼンタ
     C = "\033[36m"; M = "\033[35m"; D = "\033[2m"; R = "\033[0m"
@@ -132,7 +167,7 @@ def main():
     fill = int(round(hr / 100 * width))
     bar = C + "█" * fill + R + D + "░" * (width - fill) + R
     print(f"{C}👤 {hr:.0f}%{R} {bar} {M}🤖 {ar:.0f}%{R} "
-          f"{D}({human//1000}k / {ai//1000}k tok){R}")
+          f"{D}({human//1000}k / {ai//1000}k tok)[{tag}]{R}")
 
 
 if __name__ == "__main__":

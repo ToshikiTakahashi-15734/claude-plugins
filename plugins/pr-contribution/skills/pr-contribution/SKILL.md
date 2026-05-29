@@ -18,6 +18,25 @@ Claude Code の transcript を解析し、作業における人間とAIの寄与
 
 スクリプトはプラグイン内に同梱されている。パスは環境変数 `${CLAUDE_PLUGIN_ROOT}` を基点に参照する。
 
+## ステータスラインのモード（`statusline.py`）
+
+画面下部の常時表示には2モードある。モードは `~/.claude/pr-contribution.mode`
+（環境変数 `PR_CONTRIB_MODE_FILE` で変更可）で切り替える。
+
+| モード | 挙動 | 式 |
+|---|---|---|
+| **human-start**（既定） | まだAIが何も生成していない状態は**人間100%**から始まり、AIが生成するほど実比率へ収束 | `(H+K) / (H+A+K)` |
+| **raw** | 生の累積比率（従来）。データ皆無なら `--` | `H / (H+A)` |
+
+- `K` は100%の粘り具合を決める初期人間クレジット（既定5000tok）。`human-start:20000` のように指定可。
+- 切替コマンド:
+  ```bash
+  echo human-start   > ~/.claude/pr-contribution.mode   # 100%スタート（既定）
+  echo human-start:20000 > ~/.claude/pr-contribution.mode  # 100%を長く保つ
+  echo raw           > ~/.claude/pr-contribution.mode   # 生の累積
+  ```
+- 表示末尾に現在のモードが `[start]` / `[raw]` として出る。
+
 ## 指標① 会話コンテキスト比率（`analyze.py`）
 
 「どれだけ相談・資料を投入したか」= **会話・コンテキストの量**を測る。
